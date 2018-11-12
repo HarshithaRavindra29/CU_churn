@@ -1,45 +1,74 @@
-install.packages("shiny")
-library(shiny)
 
-data=read.csv("C:\\Users\\nihuj\\Desktop\\CU_EDA_variables.csv")
-#ui<- fluidPage()
-#server<-function(input,output){}
-#shinyApp(ui=ui,server=server)
+install.packages("ggpubr")
+install.packages("polycor")
+install.packages("Hmisc")
+install.packages("plotly")
+library("ggpubr")
+library(ggm)
+library(ggplot2)
+library(Hmisc)
+library(plyr)
+library(corrplot)
+library(plotly)
 
-#library(ggplot2)
-#library(shiny)
+install.packages("shinydashboard")
+library(shinydashboard)
 
-ui <- fluidPage(
-  fluidRow(
-    plotOutput("plot1", height = 300, width = 300,
-               click = "plot1_click",
-    )
-  ),
-  verbatimTextOutput("x_value"),
-  verbatimTextOutput("selected_rows")
+header <- dashboardHeader(title = "R Shiny Dashboard")  
+
+sidebar <- dashboardSidebar(
+  sidebarMenu(
+    menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"))
+  )
 )
 
-server <- function(input, output) {
-  output$plot1 <- renderPlot({
-    ggplot(, aes(x=data$Age_bin, fill=data$Cust_type)) + ggtitle("Percentage of people in different Age Groups") + xlab("Age") +
-      geom_bar(aes(y = 100*(..count..)/sum(..count..)), width = 0.5) + ylab("Percentage") + coord_flip() + theme_minimal()
-  })
-  
-  # Print the name of the x value
-  output$x_value <- renderPrint({
-    if (is.null(input$plot1_click$x)) return()
-    
-    lvls <- levels(data$Age_bin)
-    lvls[round(input$plot1_click$x)]
-  })
-  
-  # Print the rows of the data frame which match the x value
-  output$selected_rows <- renderPrint({
-    if (is.null(input$plot1_click$x)) return()
-    panel = input$plot1_click$panelvar1
-    keeprows <- input$plot1_click$x ==data$Age_bin & data$Cust_type==panel
-    keeprows
-  })
 
+
+frow2 <-fluidRow(
+  box(
+    title = "Plot 1"
+    ,status = "primary"
+    ,solidHeader = TRUE 
+    ,collapsible = TRUE 
+    ,plotOutput("ByAge", height = "300px")
+    
+  )
+  ,box(
+    title = "Plot 2"
+    ,status = "primary"
+    ,solidHeader = TRUE 
+    ,collapsible = TRUE 
+    ,plotOutput("ByType", height = "300px")
+  ) 
+)
+# combine the two fluid rows to make the body
+body <- dashboardBody(frow2)
+
+ui <- dashboardPage(title = 'This is my Page title', header, sidebar, body, skin='red')
+
+server <- function(input, output) 
+{
+  
+  output$ByAge <- renderPlot({
+    
+    ggplot(data=Cust_data,aes(x=Cust_data$Cust_clust, y=Cust_data$RMT_score))+ 
+      geom_point(data = Cust_data, 
+                 aes(color=(Cust_data$Age_bin)) )+ ylab("RMT_score") + 
+      xlab("Cluster") + theme(legend.position="bottom" 
+                         ,plot.title = element_text(size=15, face="bold")) + 
+      ggtitle("By Age") + labs(fill = "Region")})
+  
+  output$ByType<- renderPlot({
+    ggplot(data=Cust_data,aes(x=Cust_data$Cust_clust, y=Cust_data$RMT_score))+ 
+      geom_point(data = Cust_data, 
+                 aes(color=(Cust_data$Cust_type)) )+ ylab("RMT_score") + 
+      xlab("Cluster") + theme(legend.position="bottom" 
+                              ,plot.title = element_text(size=15, face="bold")) + 
+      ggtitle("By Type") + labs(fill = "Region")
+    
+    
+  })
 }
+
 shinyApp(ui, server)
+
