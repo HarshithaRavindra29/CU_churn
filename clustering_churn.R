@@ -34,8 +34,12 @@ Cust_data[,RMT_score := norm_jul_tr+norm_jul_sav+norm_jul_ln+norm_months]
 #   labs(subtitle = 'Elbow method')
 
 
-clust = kmeans(Cust_data[,.(norm_months, norm_jul_tr, norm_jul_sav, norm_jul_ln)],5)
-Cust_data[,Cust_clust := clust$cluster]
-plot(Cust_data$RMT_score , Cust_data$Cust_clust)
+#clust = kmeans(Cust_data[,.(norm_months, norm_jul_tr, norm_jul_sav, norm_jul_ln)],5)
+#Cust_data[,Cust_clust := clust$cluster]
+#plot(Cust_data$RMT_score , Cust_data$Cust_clust)
+#clust_summary = Cust_data[,.N, by= .(Age_bin,Cust_type,Cust_clust)]
 
-clust_summary = Cust_data[,.N, by= .(Age_bin,Cust_type,Cust_clust)]
+
+#Clustering based on RMT score
+clust = kmeans(Cust_data[,.(RMT_score)],4)
+Cust_data[,Cust_clust := clust$cluster]
