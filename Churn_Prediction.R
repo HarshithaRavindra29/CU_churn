@@ -11,7 +11,7 @@ library(caret)
 library(e1071)
 
 options(scipen = 999)
-setwd("C:\\Users\\User\\Desktop\\MSIM-1sem\\PAF\\churn")
+
 #reading as a data frame first to autmatically add "1"/"2" next ro duplicated column names 
 member = read.csv("Member Dataset.csv")
 
